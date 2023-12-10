@@ -1,0 +1,35 @@
+{
+  "name": "@clapp/init",
+  "version": "1.0.2",
+  "main": "./lib/main.js",
+  "exports": {
+    ".": "./lib/main.js",
+    "./utils": "./lib/utils.js",
+    "./load": "./lib/load.js",
+    "./preload": "./lib/preload.js",
+    "./api": "./lib/api.js",
+    "./foo": "./lib/foo.js"
+  },
+  "files": [
+    "lib",
+    "types"
+  ],
+  "scripts": {
+    "esbuild:build": "clapp build",
+    "esbuild:watch": "clapp build --watch",
+    "node:watch": "node --enable-source-maps --watch lib/main.js",
+    "dts:build": "tsc -d --emitDeclarationOnly",
+    "dts:watch": "tsc --emitDeclarationOnly --watch",
+    "build": "npm run esbuild:build && npm run dts:build",
+    "dev": "npm run esbuild:watch"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@clapp/hmr": "file:../hmr",
+    "@clapp/server": "file:../server",
+    "@clapp/setup": "file:../setup",
+    "@clapp/init": "file:../init",
+    "@types/crawless": "file:../../../crawless.dev/@types/crawless"
+  }
+}
