@@ -2,11 +2,16 @@ import path from "node:path";
 import fs from "node:fs";
 import { Console } from "node:console";
 
+export { Console, fs, path };
+
 export function reloadScript(
 	FILE_URL: string,
 	async = false,
 	type = "text/javascript"
 ) {
+	if (typeof window === "undefined") {
+		return;
+	}
 	return new Promise((resolve, reject) => {
 		try {
 			const scriptEle = document.createElement("script");
@@ -67,14 +72,15 @@ export function reloadModule(id, prop) {
 
 export const purgeRequireCache = (buildPath: string, dir = false) => {
 	if (dir) buildPath = path.resolve(buildPath, "../");
-	console.log("purge cachesf", buildPath);
+	console.warn("[purgeRequireCache][root]", buildPath);
 	for (let key in require.cache) {
-		if (key.startsWith(buildPath)) {
+		if (key.startsWith(buildPath) && !key.includes("/node_modules/")) {
 			delete require.cache[key];
-			console.log("cache deleted", key);
+			console.log("	-", key.replace(buildPath, "."));
 		}
 	}
 };
+
 export const makeModule = (o, id, filename, getter) => {
 	const t = new o(id, null);
 	(t.id = id),
@@ -129,4 +135,22 @@ export function defineGetter(
 		enumerable: true,
 		configurable: true,
 	});
+}
+
+export function symlink(srcPath: string, destPath: string) {
+	if (!fs.existsSync(srcPath)) {
+		throw new Error(`Source path not found at: ${srcPath}`);
+	}
+	if (!fs.existsSync(destPath)) {
+		fs.mkdirSync(destPath, { recursive: true });
+	}
+	const srcName = path.parse(srcPath).name;
+	const linkPath = path.resolve(destPath, srcName);
+
+	if (!fs.existsSync(linkPath)) {
+		fs.symlinkSync(srcPath, linkPath, "dir");
+	}
+	const isDirectory = fs.statSync(linkPath).isDirectory();
+
+	return { srcPath, linkPath, isDirectory };
 }

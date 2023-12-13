@@ -1,2 +1,2 @@
-export const foo = 8000;
-export * from "./sub/lev1/bar";
+export const foo = 132;
+export * from "./sub/bar";

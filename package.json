@@ -27,9 +27,10 @@
   "license": "ISC",
   "dependencies": {
     "@clapp/hmr": "file:../hmr",
+    "@clapp/init": "file:../init",
     "@clapp/server": "file:../server",
     "@clapp/setup": "file:../setup",
-    "@clapp/init": "file:../init",
+    "@playground/vscode": "file:../../../crawless.dev/@playground/vscode",
     "@types/crawless": "file:../../../crawless.dev/@types/crawless"
   }
 }

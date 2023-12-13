@@ -1,33 +1,56 @@
-import path from "node:path";
 import hmr from "@clapp/hmr";
-
-// @ts-ignore
-clapp._index_load = self._load_index = (self._load_index || 0) + 1;
-// const modRoot = path.resolve(module.path, "../");
-
-clapp.reloadMainScript = () =>
-	clapp.utils.reloadScript(CLAPP.SCRIPT_SRC, false, "module");
+import path from "node:path";
+import pkg from "../package.json";
 
 hmr(
+	module,
 	async (e) => {
-		console.log(`[HMR]`, e);
-		if (e.moduleId === __filename) {
-			console.clear();
-			console.warn("[HMR]", "Reloading main script");
-			await e.watcher.close();
-			await clapp.reloadMainScript();
-			return;
+		globalThis.clapp = require("@clapp/init/api");
+
+		console.log(
+			`%c[HMR][${pkg.name}][${clapp._index}] %c${e.event} %c[${
+				e.watcher.options.cwd
+			}] ${e.filePath || ""}`,
+
+			"color: #bada55",
+			"color: Orange; font-weight:bold",
+			"color: DodgerBlue"
+		);
+
+		if (e.moduleTree)
+			e.moduleTree.map((f, i) =>
+				console.log(
+					`	* %c[${i}] %c${f}`,
+					"color: DodgerBlue",
+					"font-weight:normal"
+				)
+			);
+
+		if (e.event === "init") {
+			console.log("options", e.watcher.options);
 		}
-		clapp.utils = require("@clapp/init/utils");
-		clapp.api = require("@clapp/init/foo");
+		// console.dir(e);
+
+		if (e.event === "change") {
+			// console.log("watched", e.watcher.getWatched());
+
+			if (e.moduleId === __filename || e.moduleId === CLAPP.SCRIPT_SRC) {
+				console.clear();
+				// console.dir(e.watcher);
+				console.warn("[HMR]", "Reloading > ", e.moduleId);
+				await e.watcher.close();
+				delete hmr.watchers[e.moduleId];
+				await clapp.reload(e.options.cwd);
+			}
+		}
 	},
 	{
-		// watchDir: "../lib",
-		// debug: true,
-	},
-	module
+		cwd: path.resolve(__dirname, "../../"),
+		watch: ["**/lib/**/*.js", "**/*.json"],
+		// followSymlinks: false,
+	}
 );
 
-module.exports = function load(main_module, main_require) {
-	console.log("loading all necesary modules");
+export = function load(...args: any[]) {
+	// console.log("load", ...args);
 };
